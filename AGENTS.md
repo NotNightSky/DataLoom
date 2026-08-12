@@ -1,6 +1,6 @@
 # AGENTS.md
 
-DataLoom: a browser tool that converts Minecraft data-pack JSON (recipes, tags, loot tables) into Fabric DataGen Java code. Currently a minimal blank scaffold — the three-panel prototype was scrapped; rebuild the UI from here.
+DataLoom: a browser tool that converts Minecraft data-pack JSON (recipes, tags, loot tables) into Fabric DataGen Java code. Currently a single Header on a blank scaffold — the three-panel prototype was scrapped; rebuild the rest of the UI from here.
 
 ## Commands
 
@@ -13,10 +13,11 @@ DataLoom: a browser tool that converts Minecraft data-pack JSON (recipes, tags, 
 
 - **Preact**, not React. JSX compiles via `jsxImportSource: "preact"`; never import from `react`. lucide-react icons still work via path alias, but when passing icon components as props, type them `any` to avoid Preact/React JSX type clashes.
 - **TypeScript 6** with `erasableSyntaxOnly` (no enums, namespaces, or parameter properties) and `verbatimModuleSyntax` (must use `import type`). `noUnusedLocals/Parameters` are on — unused code fails `pnpm build`.
-- `src/app.tsx` is the app root; `src/index.css` is the Tailwind config: Tailwind v4 via `@tailwindcss/vite` with custom theme colors (`mc_dark`, `mc_border`) declared inline in `@theme` — do not add a `tailwind.config` file.
+- `src/app.tsx` is the app root. Components live in `src/component/` (TS only) with their CSS in `src/styles/` — keep styling out of component files. `src/index.css` is the Tailwind config: Tailwind v4 via `@tailwindcss/vite` with an inline `@theme` block — do not add a `tailwind.config` file.
+- Theming uses CSS variables (`--app-bg`, `--surface`, `--border`, `--text-primary`, `--text-muted`, `--accent`, `--accent-secondary`) defined in `src/styles/header.css` using a dark Material palette: black `#000000` bg, `#121212` surfaces, `#272727` borders, purple `#bb86fc` primary accent, teal `#03dac6` secondary. The header's palette button sets `data-theme="teal"` on `<html>` to swap which accent is primary — there is no light theme. Keep new UI on these vars.
+- lucide-react no longer ships brand icons (`Github` is absent) — inline the GitHub SVG like `Header.tsx` does.
 - `public/` assets (`favicon.svg`, `icons.svg`) are served as-is; `src/assets/` was cleared — put real images back there if needed.
 
 ## Conventions
 
-- App is conspicuously mono-panel-styled (VS Code dark theme, three side-by-side panels); keep new UI in that style — the scrapped prototype's design language: `#1e1e1e` background, `#3c3c3c` header, sky-blue (`text-sky-400`) accents.
-- Semicolons are used in `app.tsx`, though the template omits them elsewhere; match the surrounding file.
+- App is conspicuously mono-panel-styled (VS Code dark theme, three side-by-side panels); keep new UI in that style — the scrapped prototype's design language: black background with Material purple/teal accents.
