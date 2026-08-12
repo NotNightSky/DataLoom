@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'preact/hooks';
-import { Braces, Eye } from 'lucide-react';
+import { Braces, ChevronLeft, Eye } from 'lucide-react';
 import '../lib/monaco';
 import type { DataDoc, GeneratorBackend, JsonValue } from '../lib/types';
 import { VisualEditor } from './VisualEditor';
@@ -11,9 +11,10 @@ type EditorMode = 'visual' | 'json';
 
 interface EditorPageProps {
   backend: GeneratorBackend;
+  onBack?: () => void;
 }
 
-export function EditorPage({ backend }: EditorPageProps) {
+export function EditorPage({ backend, onBack }: EditorPageProps) {
   const [doc, setDoc] = useState<DataDoc>(backend.defaultDoc);
   const [mode, setMode] = useState<EditorMode>('visual');
   const [jsonText, setJsonText] = useState(() => JSON.stringify(backend.defaultDoc, null, 2));
@@ -60,6 +61,12 @@ export function EditorPage({ backend }: EditorPageProps) {
   return (
     <div className="editor-view">
       <div className="editor-toolbar">
+        {onBack && (
+          <button type="button" className="pane-btn toolbar-back" onClick={onBack} aria-label="Back to generators">
+            <ChevronLeft size={14} />
+            Generators
+          </button>
+        )}
         <div className="mode-toggle" role="group" aria-label="Editor mode">
           <button
             type="button"
