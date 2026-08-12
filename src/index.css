@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-mc_dark: #1e1e1e;
+  --color-mc_border: #3e3e42;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
