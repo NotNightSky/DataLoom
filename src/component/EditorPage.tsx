@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Braces, ChevronLeft, Eye } from 'lucide-react';
 import '../lib/monaco';
 import type { DataDoc, GeneratorBackend, JsonValue } from '../lib/types';
@@ -20,8 +20,41 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
   const [jsonText, setJsonText] = useState(() => JSON.stringify(backend.defaultDoc, null, 2));
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [split, setSplit] = useState(61.5);
+  const [dragging, setDragging] = useState(false);
+  const columnsRef = useRef<HTMLDivElement>(null);
 
   const java = useMemo(() => backend.generateJava(doc), [doc, backend]);
+
+  const updateSplit = (clientX: number) => {
+    const container = columnsRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const available = rect.width - 12;
+    if (available <= 0) return;
+    const fraction = (clientX - rect.left - 6) / available;
+    setSplit(Math.min(82, Math.max(18, fraction * 100)));
+  };
+
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (event: PointerEvent) => updateSplit(event.clientX);
+    const onUp = () => {
+      setDragging(false);
+      document.body.classList.remove('resizing');
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, [dragging]);
+
+  const startSplitDrag = () => {
+    setDragging(true);
+    document.body.classList.add('resizing');
+  };
 
   const switchMode = (next: EditorMode) => {
     if (next === mode) return;
@@ -93,8 +126,11 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
         <span className="toolbar-id">backend: {backend.id}</span>
       </div>
 
-      <div className="editor-columns">
-        <section className="editor-column editor-column-main">
+      <div className="editor-columns" ref={columnsRef}>
+        <section
+          className="editor-column editor-column-main"
+          style={{ flexGrow: split, flexBasis: 0, flexShrink: 1 }}
+        >
           {mode === 'visual' ? (
             <VisualEditor backend={backend} doc={doc} onChange={setDoc} />
           ) : (
@@ -102,7 +138,18 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
           )}
         </section>
 
-        <section className="editor-column">
+        <div
+          className={`editor-splitter${dragging ? ' active' : ''}`}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize editor panes"
+          onPointerDown={startSplitDrag}
+        />
+
+        <section
+          className="editor-column"
+          style={{ flexGrow: 100 - split, flexBasis: 0, flexShrink: 1 }}
+        >
           <JavaOutput value={java} copied={copied} onCopy={handleCopy} />
         </section>
       </div>

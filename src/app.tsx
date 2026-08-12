@@ -9,9 +9,9 @@ export function App() {
   const [backend, setBackend] = useState<GeneratorBackend | null>(null);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[var(--app-bg)] text-[var(--text-primary)]">
+    <div className="h-screen flex flex-col overflow-hidden bg-(--app-bg) text-(--text-primary)">
       <Header />
-      <main className="flex-grow flex flex-col min-h-0">
+      <main className="grow flex flex-col min-h-0">
         {backend ? (
           <EditorPage backend={backend} onBack={() => setBackend(null)} />
         ) : (
