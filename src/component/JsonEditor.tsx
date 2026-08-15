@@ -1,14 +1,17 @@
 import Editor from '@monaco-editor/react';
 import type { OnChange } from '@monaco-editor/react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 
 interface JsonEditorProps {
   value: string;
   onChange: (value: string) => void;
   error: string | null;
+  issues: string[];
+  recovered: boolean;
+  booting: boolean;
 }
 
-export function JsonEditor({ value, onChange, error }: JsonEditorProps) {
+export function JsonEditor({ value, onChange, error, issues, recovered, booting }: JsonEditorProps) {
   const handleChange: OnChange = (next) => {
     onChange(next ?? '');
   };
@@ -18,10 +21,17 @@ export function JsonEditor({ value, onChange, error }: JsonEditorProps) {
       <div className="pane-header">
         <span className="pane-title">JSON</span>
         <div className="pane-actions">
-          {error ? (
+          {booting ? (
+            <span className="pane-badge">Spyglass booting…</span>
+          ) : error ? (
             <span className="pane-warning" title={error}>
               <AlertCircle size={13} />
               Invalid JSON
+            </span>
+          ) : recovered || issues.length > 0 ? (
+            <span className="pane-warning" title={[...issues, 'Generated from the recovered AST parts.'].join('\n')}>
+              <AlertTriangle size={13} />
+              {recovered ? `Recovered ${issues.length} issue${issues.length === 1 ? '' : 's'}` : `${issues.length} issue${issues.length === 1 ? '' : 's'}`}
             </span>
           ) : (
             <span className="pane-ok">Valid JSON</span>
@@ -47,7 +57,9 @@ export function JsonEditor({ value, onChange, error }: JsonEditorProps) {
         />
       </div>
       <div className="pane-footer">
-        <span className="pane-footer-hint">JSON edits update the visual form and generated Java live.</span>
+        <span className="pane-footer-hint">
+          Parsed via the Spyglass AST — broken documents still generate from the recovered parts.
+        </span>
       </div>
     </div>
   );

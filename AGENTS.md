@@ -1,6 +1,6 @@
 # AGENTS.md
 
-DataLoom: a browser tool that converts Minecraft data-pack JSON (recipes, tags, loot tables) into Fabric DataGen Java code. The editor page is built (Visual/JSON editors + read-only generated-Java pane); the generator backend picker page does not exist yet.
+DataLoom: a browser tool that converts Minecraft data-pack JSON (recipes, tags, loot tables) into Fabric DataGen Java code. The generator picker (`GeneratorGrid`) and the editor workspace (JSON editor + read-only generated-Java pane) are built; JSON parsing is powered by Spyglass, which recovers partial documents from broken JSON.
 
 ## Commands
 
@@ -20,16 +20,34 @@ DataLoom: a browser tool that converts Minecraft data-pack JSON (recipes, tags, 
 
 ## Editor page and Monaco
 
-- `src/component/EditorPage.tsx` is the abstract editor workspace: left pane toggles Visual/JSON via the mode buttons, right pane is the read-only generated-Java output. It takes a `GeneratorBackend` prop, so another page can pick the backend — none exists yet.
+- `src/component/EditorPage.tsx` is the abstract editor workspace: left pane is the JSON editor, right pane is the read-only generated-Java output. It takes a `GeneratorBackend` prop; `src/app.tsx` shows the backend picker (`GeneratorGrid`) until one is chosen.
 - The two panes are resized by a draggable splitter (`editor-splitter` div between the columns) that drags proportionally: `EditorPage.tsx` stores `split` as the left pane's percentage of available width (clamped 18–82, default 61.5), applied as inline `flexGrow` on each column with `flexBasis: 0`; drag is handled via `pointerdown` + window `pointermove`/`pointerup` listeners and a `body.resizing` class (cursor: col-resize, no text selection). Keep the splitter's 12px width in sync with the 12 subtracted in `updateSplit` if you restyle it.
-- Backend abstraction lives in `src/lib/`: `types.ts` defines `DataDoc`, `FieldSchema`, `GeneratorBackend`; `generators.ts` holds a `REGISTRY` array plus a placeholder recipe backend (schema-driven visual form + Java generation). Add new backends to `REGISTRY`; `getBackend(id)` resolves them.
-- `src/component/VisualEditor.tsx` renders any `FieldSchema` generically (string/number/boolean/select/array/object) — no per-type hardcoding in the page.
+- Backend abstraction lives in `src/lib/`: `types.ts` defines `DataDoc` and `GeneratorBackend`; `generators.ts` holds a `REGISTRY` array plus the recipe/tag/loot-table backends (defensive `generateJava(doc)` that tolerates partially recovered documents). Add new backends to `REGISTRY`; `getBackend(id)` resolves them. `GeneratorGrid.tsx` renders one card per `REGISTRY` entry via `CARD_ICONS` keyed by backend id (icon components are typed `any`).
 - **Monaco is bundled, not CDN**: `src/lib/monaco.ts` wires `loader.config({ monaco })`, imports the lean `monaco-editor/editor/editor.api.js` (NOT the full `monaco-editor` package — that pulls in every language and the ~7 MB TS worker), adds only the JSON language via `monaco-editor/language/json/monaco.contribution.js`, registers a custom `java` Monarch language, and sets up `MonacoEnvironment` workers from `?worker` imports.
 - Monaco worker imports must use the exports-map-friendly specifier (`monaco-editor/editor/editor.worker.js?worker`, `monaco-editor/language/json/json.worker.js?worker`) — `monaco-editor/esm/vs/...` paths fail to resolve under Vite/Rolldown.
 - Never import `monaco-editor` (full package). If a new language/feature is needed, import its `monaco.contribution.js` from `monaco-editor/language/...` or the lean entry.
 - `vite.config.ts` sets `worker: { format: 'es' }` (required for monaco workers). Do not remove.
 
+## Spyglass parsing
+
+- `src/lib/spyglass.ts` is a singleton browser wrapper around @spyglassmc/core (0.4.x). It constructs a `Project` with `BrowserExternals` (`@spyglassmc/core/lib/browser.js`) and the JSON initializer (`@spyglassmc/json`'s `getInitializer()`), calls `project.init()` only (no `ready()` — vanilla datapack providers are skipped on purpose; no network), and parses documents with its own `ParserContext` + core `file(parser)`. `Service` has no `parse()` and no `ready()` in 0.4.x — do not use the older public API.
+- `parse()` returns a `DataDoc` (mirroring the strict `{ "data": { ... } }` envelope) plus `errors` and a `recovered` flag. Spyglass keeps generating an AST for broken JSON, so the Java backends keep working on partial documents; `recovered` is detected via a strict `JSON.parse` probe.
+- `EditorPage.handleJsonChange` runs the parse through a debounced, sequence-guarded async flow (`parseTimer`/`parseSeq` refs); the JSON pane shows boot/OK/recovered chips via props on `JsonEditor`.
+- `runtime` note: Spyglass's own libs are browser-clean, but `vite-plugin-node-polyfills` in `vite.config.ts` is still required for the transitive CJS deps (decompress, graceful-fs, follow-redirects). Don't remove the plugin's `include` list.
+- `vscode-languageserver-textdocument` is a direct dependency (used to create the `TextDocument` for `ParserContext`).
+
+## Features & specs
+
+- **Backend picker** (`src/app.tsx` + `GeneratorGrid.tsx`): the app starts with no backend selected, so the picker page is shown until one is chosen; `EditorPage` gets the chosen backend and a back button that resets to the picker. Cards are rendered one per `REGISTRY` entry with an icon (`CARD_ICONS` keyed `recipe`/`tag`/`loot_table`, fallback `Blocks`), the backend `name`, `description`, and an "Open" CTA; the grid header shows the backend count.
+- **Backend contract**: a backend is `{ id, name, description, defaultJson, generateJava(doc) }`. `defaultJson` seeds both the JSON editor text and the initial `DataDoc` (via `parseDefaultJson`, which falls back to `{ data: {} }`). `REGISTRY` ships 3 backends: `recipe` (shaped recipes → `ShapedRecipeJsonBuilder` with `.pattern(...)` rows, `has_item` criterion on DIRT, `offerTo(exporter)`), `tag` (`getOrCreateTagBuilder` with `.add`/`.addOptional(Identifier.of(...))`), `loot_table` (currently a comment plus a pretty-printed JSON dump). Unknown `type` on a recipe falls back to a JSON-dump comment.
+- **Editor workspace** (`EditorPage`): left pane is the JSON editor, right pane is read-only generated Java; both are Monaco (vs-dark). The splitter drags proportionally (`split` % clamped 18–82, default 61.5, splitter width 12px). Toolbar shows back button, `name — id`, and `backend: <id>`. Java is recomputed via `useMemo(generateJava(doc))` whenever the parsed doc changes.
+- **JSON editor status chips** (`JsonEditor`): while Spyglass boots → "Spyglass booting…"; parse failure → "Invalid JSON" with the message in a tooltip; parse succeeded but doc was recovered or issues exist → "Recovered N issues"/"N issues" with messages in the tooltip; clean parse → "Valid JSON". Footer states that broken documents still generate from recovered parts.
+- **Spyglass recovery flow**: parsing is debounced 80 ms and sequence-guarded (`parseTimer`/`parseSeq`) so stale results are dropped; a partial AST still yields a `DataDoc` and regenerates Java, so edits never block the output — the JSON pane only shows an error when no usable root object could be extracted.
+- **Copy button** (`JavaOutput`): copies the generated Java via `navigator.clipboard`; shows "Copied" with a check for 2 s.
+- **Header** (`Header.tsx`): brand + DataLoom wordmark, a search input (present but not wired to any logic), a palette button that toggles `data-theme` between `teal` and `purple` on `<html>` (default purple), and an inline GitHub SVG link to the profile (lucide's `Github` icon is unavailable).
+- **Footer** (`Footer.tsx`): attribution to NotNightSky with a ♡, "Made with Vite and Preact".
+
 ## Conventions
 
 - App is conspicuously mono-panel-styled (VS Code dark theme, side-by-side panels); keep new UI in that style — black background with Material purple/teal accents.
-- Editor pages use the shared `editor.css` classes (`editor-view`, `editor-toolbar`, `mode-toggle`, `editor-columns`, `editor-pane`, `pane-header/body/footer`, `pane-btn`) — reuse these when adding panels; don't reinvent.
+- Editor pages use the shared `editor.css` classes (`editor-view`, `editor-toolbar`, `editor-columns`, `editor-pane`, `pane-header/body/footer`, `pane-btn`) — reuse these when adding panels; don't reinvent.

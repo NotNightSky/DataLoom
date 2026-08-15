@@ -1,34 +1,18 @@
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
 export interface DataDoc {
-  type: string;
-  data: Record<string, JsonValue>;
-}
-
-export type FieldType = 'string' | 'number' | 'boolean' | 'select' | 'array' | 'object';
-
-export interface FieldOption {
-  value: string;
-  label: string;
-}
-
-export interface FieldSchema {
-  key: string;
-  label: string;
-  type: FieldType;
-  help?: string;
-  options?: FieldOption[];
-  fields?: FieldSchema[];
-  itemType?: FieldType;
-  itemFields?: FieldSchema[];
-  placeholder?: string;
+  /** The recovered JSON object structure extracted from the Spyglass AST */
+  data: Record<string, unknown>;
 }
 
 export interface GeneratorBackend {
   id: string;
-  label: string;
-  docType: string;
-  defaultDoc: DataDoc;
-  schema: FieldSchema[];
-  generateJava(doc: DataDoc): string;
+  name: string;
+  description: string;
+  defaultJson: string;
+  /**
+   * Transforms the DataDoc (which may be a partially recovered AST shape)
+   * into a string of Fabric DataGen Java code.
+   */
+  generateJava: (doc: DataDoc) => string;
 }

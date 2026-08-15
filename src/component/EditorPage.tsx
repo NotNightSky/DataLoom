@@ -1,28 +1,43 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { Braces, ChevronLeft, Eye } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import '../lib/monaco';
-import type { DataDoc, GeneratorBackend, JsonValue } from '../lib/types';
-import { VisualEditor } from './VisualEditor';
+import type { DataDoc, GeneratorBackend } from '../lib/types';
+import { getSpyglass } from '../lib/spyglass';
+import type { SpyglassParseResult } from '../lib/spyglass';
 import { JsonEditor } from './JsonEditor';
 import { JavaOutput } from './JavaOutput';
 import '../styles/editor.css';
-
-type EditorMode = 'visual' | 'json';
 
 interface EditorPageProps {
   backend: GeneratorBackend;
   onBack?: () => void;
 }
 
+function parseDefaultJson(defaultJson: string): DataDoc {
+  try {
+    const parsed: unknown = JSON.parse(defaultJson);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return { data: parsed as Record<string, unknown> };
+    }
+  } catch {
+    // Fall through to the empty document.
+  }
+  return { data: {} };
+}
+
 export function EditorPage({ backend, onBack }: EditorPageProps) {
-  const [doc, setDoc] = useState<DataDoc>(backend.defaultDoc);
-  const [mode, setMode] = useState<EditorMode>('visual');
-  const [jsonText, setJsonText] = useState(() => JSON.stringify(backend.defaultDoc, null, 2));
+  const [doc, setDoc] = useState<DataDoc>(() => parseDefaultJson(backend.defaultJson));
+  const [jsonText, setJsonText] = useState(() => backend.defaultJson);
   const [jsonError, setJsonError] = useState<string | null>(null);
+  const [jsonIssues, setJsonIssues] = useState<string[]>([]);
+  const [jsonRecovered, setJsonRecovered] = useState(false);
+  const [spyglassBooted, setSpyglassBooted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [split, setSplit] = useState(61.5);
   const [dragging, setDragging] = useState(false);
   const columnsRef = useRef<HTMLDivElement>(null);
+  const parseTimer = useRef<number | undefined>(undefined);
+  const parseSeq = useRef(0);
 
   const java = useMemo(() => backend.generateJava(doc), [doc, backend]);
 
@@ -56,32 +71,56 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
     document.body.classList.add('resizing');
   };
 
-  const switchMode = (next: EditorMode) => {
-    if (next === mode) return;
-    if (next === 'json') {
-      setJsonText(JSON.stringify(doc, null, 2));
+  const applyParseResult = (result: SpyglassParseResult) => {
+    setSpyglassBooted(true);
+    if (result.doc) {
+      // Even a partially parsed AST can yield a working document, so the
+      // backend keeps generating Java for the parts Spyglass recovered.
+      setDoc(result.doc);
+      setJsonIssues(result.errors);
+      setJsonRecovered(result.recovered);
       setJsonError(null);
+      return;
     }
-    setMode(next);
+    setJsonIssues([]);
+    setJsonRecovered(false);
+    setJsonError(result.errors[0] ?? 'Document must be a JSON object.');
   };
+
+  // Boot the Spyglass engine once and seed the document from the initial JSON.
+  useEffect(() => {
+    const timer = window.setTimeout(async () => {
+      try {
+        const service = await getSpyglass();
+        applyParseResult(await service.parse(jsonText));
+      } catch (err) {
+        setSpyglassBooted(true);
+        setJsonIssues([]);
+        setJsonError(err instanceof Error ? err.message : 'Spyglass failed to initialize');
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backend]);
+
+  useEffect(() => () => window.clearTimeout(parseTimer.current), []);
 
   const handleJsonChange = (value: string) => {
     setJsonText(value);
-    try {
-      const parsed: unknown = JSON.parse(value);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        const candidate = parsed as Record<string, unknown>;
-        const data = candidate['data'];
-        if (data && typeof data === 'object' && !Array.isArray(data)) {
-          setDoc({ type: backend.docType, data: data as Record<string, JsonValue> });
-          setJsonError(null);
-          return;
-        }
+    window.clearTimeout(parseTimer.current);
+    const seq = ++parseSeq.current;
+    parseTimer.current = window.setTimeout(async () => {
+      try {
+        const service = await getSpyglass();
+        if (seq !== parseSeq.current) return;
+        applyParseResult(await service.parse(value));
+      } catch (err) {
+        if (seq !== parseSeq.current) return;
+        setSpyglassBooted(true);
+        setJsonIssues([]);
+        setJsonError(err instanceof Error ? err.message : 'Spyglass parsing failed');
       }
-      setJsonError('Document must be a JSON object with a "data" field.');
-    } catch (err) {
-      setJsonError(err instanceof Error ? err.message : 'Invalid JSON');
-    }
+    }, 80);
   };
 
   const handleCopy = () => {
@@ -100,27 +139,9 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
             Generators
           </button>
         )}
-        <div className="mode-toggle" role="group" aria-label="Editor mode">
-          <button
-            type="button"
-            className={`mode-btn${mode === 'visual' ? ' active' : ''}`}
-            onClick={() => switchMode('visual')}
-          >
-            <Eye size={14} />
-            Visual
-          </button>
-          <button
-            type="button"
-            className={`mode-btn${mode === 'json' ? ' active' : ''}`}
-            onClick={() => switchMode('json')}
-          >
-            <Braces size={14} />
-            JSON
-          </button>
-        </div>
         <span className="toolbar-divider" aria-hidden="true" />
         <span className="toolbar-doc-type">
-          {backend.label} <span className="toolbar-doc-type-muted">— {backend.docType}</span>
+          {backend.name} <span className="toolbar-doc-type-muted">— {backend.id}</span>
         </span>
         <div className="toolbar-spacer" />
         <span className="toolbar-id">backend: {backend.id}</span>
@@ -131,11 +152,14 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
           className="editor-column editor-column-main"
           style={{ flexGrow: split, flexBasis: 0, flexShrink: 1 }}
         >
-          {mode === 'visual' ? (
-            <VisualEditor backend={backend} doc={doc} onChange={setDoc} />
-          ) : (
-            <JsonEditor value={jsonText} onChange={handleJsonChange} error={jsonError} />
-          )}
+          <JsonEditor
+            value={jsonText}
+            onChange={handleJsonChange}
+            error={jsonError}
+            issues={jsonIssues}
+            recovered={jsonRecovered}
+            booting={!spyglassBooted}
+          />
         </section>
 
         <div

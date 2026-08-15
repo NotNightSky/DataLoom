@@ -4,9 +4,9 @@ import type { GeneratorBackend } from '../lib/types';
 import '../styles/generator-grid.css';
 
 const CARD_ICONS: Record<string, any> = {
-  'placeholder-recipe': CookingPot,
+  recipe: CookingPot,
   tag: Tags,
-  'loot-table': ScrollText,
+  loot_table: ScrollText,
 };
 
 interface GeneratorGridProps {
@@ -36,8 +36,8 @@ export function GeneratorGrid({ onSelect }: GeneratorGridProps) {
                 <span className="gen-card-icon">
                   <Icon size={26} />
                 </span>
-                <span className="gen-card-name">{backend.label}</span>
-                <span className="gen-card-type">{backend.docType}</span>
+                <span className="gen-card-name">{backend.name}</span>
+                <span className="gen-card-type">{backend.description}</span>
                 <span className="gen-card-cta">
                   Open <ChevronRight size={13} />
                 </span>
