@@ -50,6 +50,8 @@ Components live in `src/component/` with their CSS in `src/styles/`. Styling is 
 
 ## Roadmap
 
+*This is a Vibe-Coded project and has minimal human intervention.
+
 - Rebuild the three-panel UI: visual builder and JSON editor (Switchable), generated Java output
 - Schema-driven conversion of recipes, tags, and loot tables
 - Minecraft version targeting
