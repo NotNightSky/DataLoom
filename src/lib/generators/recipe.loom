@@ -1,0 +1,146 @@
+---
+id: recipe
+name: Recipe
+description: Generates Java recipe code based on the recipe type in the JSON.
+defaultJson: '{
+            "type": "minecraft:crafting_shaped",
+            "group": "multi_bench",
+            "key": {
+                "l": "#minecraft:logs"
+            },
+            "pattern": [
+                "ll",
+                "ll"
+            ],
+            "result": {
+                "count": 4,
+                "id": "minecraft:crafting_table"
+            }
+            }'
+---
+{{#if (eq data.type "minecraft:crafting_shaped")}}
+// Fabric DataGen Shaped Recipe
+shaped(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}}, {{coalesce data.result.count 1}})
+{{#each data.pattern}}
+    .pattern("{{this}}")
+{{/each}}
+{{#each data.key}}
+    .define('{{@key}}', {{recipeUnlock this}})
+{{/each}}
+    .unlockedBy(getHasName({{recipeUnlock data.key}}), has({{recipeUnlock data.key}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:crafting_shapeless")}}
+// Fabric DataGen Shapeless Recipe
+shapeless(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}}, {{coalesce data.result.count 1}})
+{{#each data.ingredients}}
+    {{#if this.item}}
+    .requires(Items.{{toItemEnum this.item}})
+    {{/if}}
+    {{#if this.tag}}
+    .requires(ItemTags.{{toItemEnum this.tag}})
+    {{/if}}
+{{/each}}
+    .unlockedBy(getHasName({{recipeUnlock data.ingredients}}), has({{recipeUnlock data.ingredients}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:smelting")}}
+// Fabric DataGen Smelting Recipe
+smelting(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}}, {{coalesce data.experience 0}}f, {{coalesce data.cookingtime 200}})
+{{#if data.ingredient.item}}
+    .requires(Items.{{toItemEnum data.ingredient.item}})
+{{else if data.ingredient.tag}}
+    .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
+{{else}}
+    .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+    .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:blasting")}}
+// Fabric DataGen Blasting Recipe
+blasting(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}}, {{coalesce data.experience 0}}f, {{coalesce data.cookingtime 100}})
+{{#if data.ingredient.item}}
+    .requires(Items.{{toItemEnum data.ingredient.item}})
+{{else if data.ingredient.tag}}
+    .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
+{{else}}
+    .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+    .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:smoking")}}
+// Fabric DataGen Smoking Recipe
+smoking(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}}, {{coalesce data.experience 0}}f, {{coalesce data.cookingtime 100}})
+{{#if data.ingredient.item}}
+    .requires(Items.{{toItemEnum data.ingredient.item}})
+{{else if data.ingredient.tag}}
+    .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
+{{else}}
+    .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+    .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:campfire_cooking")}}
+// Fabric DataGen Campfire Cooking Recipe
+campfireCooking(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}}, {{coalesce data.experience 0}}f, {{coalesce data.cookingtime 600}})
+{{#if data.ingredient.item}}
+    .requires(Items.{{toItemEnum data.ingredient.item}})
+{{else if data.ingredient.tag}}
+    .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
+{{else}}
+    .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+    .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:stonecutting")}}
+// Fabric DataGen Stonecutting Recipe
+stonecutting(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}}, {{coalesce data.result.count 1}})
+{{#if data.ingredient.item}}
+    .requires(Items.{{toItemEnum data.ingredient.item}})
+{{else if data.ingredient.tag}}
+    .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
+{{else}}
+    .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+    .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:smithing_transform")}}
+// Fabric DataGen Smithing Transform Recipe
+smithingTransform(
+    Ingredient.of({{recipeUnlock data.template}}),
+    Ingredient.of({{recipeUnlock data.base}}),
+    Ingredient.of({{recipeUnlock data.addition}}),
+    Items.{{#if data.result.id}}{{toItemEnum data.result.id}}{{else}}{{toItemEnum data.result}}{{/if}},
+    {{coalesce data.result.count 1}}
+)
+    .unlockedBy(getHasName({{recipeUnlock data.template}}), has({{recipeUnlock data.template}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:smithing_trim")}}
+// Fabric DataGen Smithing Trim Recipe
+smithingTrim(
+    Ingredient.of({{recipeUnlock data.template}}),
+    Ingredient.of({{recipeUnlock data.base}}),
+    Ingredient.of({{recipeUnlock data.addition}}),
+    Identifier.of("{{#if data.pattern}}{{stripNamespace data.pattern}}{{else}}silence{{/if}}")
+)
+    .unlockedBy(getHasName({{recipeUnlock data.template}}), has({{recipeUnlock data.template}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:brewing")}}
+// Fabric DataGen Brewing Recipe
+brewingRecipe(
+    {{#if data.input.item}}Items.{{toItemEnum data.input.item}}{{else}}POTION{{/if}},
+    {{#if data.reagent.item}}Items.{{toItemEnum data.reagent.item}}{{else}}NETHER_WART{{/if}},
+    {{#if data.output.id}}Items.{{toItemEnum data.output.id}}{{else}}POTION{{/if}}
+)
+    .unlockedBy(getHasName({{recipeUnlock data.input}}), has({{recipeUnlock data.input}}))
+    .save(exporter);
+{{else if (eq data.type "minecraft:crafting_dye")}}
+// Fabric DataGen Dye Recipe
+// Recipe type handled by the generic recipe generator based on the JSON "type" field.
+// Add a specialized branch here if a custom builder is required.
+{{else if (eq data.type "minecraft:crafting_transmute")}}
+// Fabric DataGen Transmute Recipe
+// Recipe type handled by the generic recipe generator based on the JSON "type" field.
+// Add a specialized branch here if a custom builder is required.
+{{else}}
+// Unsupported recipe type: {{data.type}}
+// This backend chooses a Fabric DataGen builder based on the JSON "type" field.
+{{/if}}

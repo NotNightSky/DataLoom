@@ -4,7 +4,7 @@ import type { GeneratorBackend } from '../lib/types';
 import '../styles/generator-grid.css';
 
 const CARD_ICONS: Record<string, any> = {
-  recipe_shaped: CookingPot,
+  recipe: CookingPot,
   item_tag: Tags,
 };
 
