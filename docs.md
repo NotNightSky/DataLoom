@@ -1,5 +1,7 @@
 # DataLoom `.loom` Generator Backends
 
+> Tooling spec (grammars, scopes, schemas, completions, diagnostics): see `LOOM_SPEC.md`.
+
 A `.loom` file is a single source of truth for a generator backend: YAML frontmatter with backend
 metadata plus a Handlebars template that turns a parsed `DataDoc` into Fabric DataGen Java code.
 The custom Vite plugin (`vite-plugin-loom.ts`) parses the frontmatter with `js-yaml` and precompiles
