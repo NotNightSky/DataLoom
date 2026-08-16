@@ -8,7 +8,6 @@ import {
 } from '@spyglassmc/core';
 import { BrowserExternals } from '@spyglassmc/core/lib/browser.js';
 import { getInitializer as getJsonInitializer } from '@spyglassmc/json';
-import { JsonNode } from '@spyglassmc/json';
 import type { JsonArrayNode, JsonFileNode, JsonNode as JsonNodeType } from '@spyglassmc/json';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import type { DataDoc, JsonValue } from './types';
@@ -65,7 +64,7 @@ async function createSpyglass(): Promise<Spyglass> {
     // error stub when nothing could be recovered).
     const jsonFile = file?.children[0] as JsonFileNode | undefined;
     const entry = jsonFile?.children[0];
-    if (entry && JsonNode.is(entry) && entry.type === 'json:object') {
+    if (entry && entry.type === 'json:object') {
       const value = nodeToValue(entry);
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         return {

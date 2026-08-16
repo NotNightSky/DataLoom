@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react';
 import { Check } from 'lucide-react';
+import { useIsLight } from '../lib/theme';
 
 interface JavaOutputProps {
   value: string;
@@ -8,8 +9,9 @@ interface JavaOutputProps {
 }
 
 export function JavaOutput({ value, copied, onCopy }: JavaOutputProps) {
+  const isLight = useIsLight();
   return (
-    <div className="editor-pane output-pane">
+    <div className="editor-pane">
       <div className="pane-header">
         <span className="pane-title">Generated Java</span>
         <div className="pane-actions">
@@ -23,7 +25,7 @@ export function JavaOutput({ value, copied, onCopy }: JavaOutputProps) {
         <Editor
           height="100%"
           language="java"
-          theme="vs-dark"
+          theme={isLight ? 'vs' : 'vs-dark'}
           value={value}
           options={{
             readOnly: true,

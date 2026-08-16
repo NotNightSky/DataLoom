@@ -7,15 +7,16 @@ import type { GeneratorBackend } from './lib/types';
 
 export function App() {
   const [backend, setBackend] = useState<GeneratorBackend | null>(null);
+  const [query, setQuery] = useState('');
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-(--app-bg) text-(--text-primary)">
-      <Header />
+      <Header search={query} onSearchChange={setQuery} />
       <main className="grow flex flex-col min-h-0">
         {backend ? (
           <EditorPage backend={backend} onBack={() => setBackend(null)} />
         ) : (
-          <GeneratorGrid onSelect={setBackend} />
+          <GeneratorGrid query={query} onSelect={setBackend} />
         )}
       </main>
       <Footer />

@@ -12,18 +12,19 @@
     "@monaco-editor/react": "^4.7.0",
     "@spyglassmc/core": "^0.4.53",
     "@spyglassmc/json": "^0.3.57",
-    "@spyglassmc/mcdoc": "^0.3.57",
     "@tailwindcss/vite": "^4.3.3",
+    "handlebars": "^4.7.9",
     "lucide-react": "^1.31.0",
     "monaco-editor": "^0.56.0",
-    "monaco-languageclient": "^10.7.0",
     "preact": "^10.29.7",
     "tailwindcss": "^4.3.3",
     "vscode-languageserver-textdocument": "^1.0.12"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.13.3",
+    "js-yaml": "^5.3.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vite-plugin-node-polyfills": "^0.28.0"

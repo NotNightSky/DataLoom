@@ -1,0 +1,37 @@
+/* Single source of truth for all theme tokens. */
+:root {
+  --app-bg: #000000;
+  --surface: #121212;
+  --surface-alt: #0e0e0e; /* pane headers/footers, grid header bars */
+  --surface-hover: #161616; /* card hover */
+  --border: #272727;
+  --text-primary: #ffffff;
+  --text-muted: #a0a0a0;
+  --accent: #bb86fc;
+  --accent-secondary: #03dac6;
+  --warning: #ffb86c;
+}
+
+/* Order matters: the accent override must come AFTER the light palette so
+   it wins the cascade tie on `light-teal` (equal specificity, later wins). */
+:root[data-theme='light'],
+:root[data-theme='light-teal'] {
+  --app-bg: #f5f5f5; /* Light gray background */
+  --surface: #ffffff; /* Pure white for editor panes and cards */
+  --surface-alt: #f0f0f0; /* Lighter bars above white surfaces */
+  --surface-hover: #ececec;
+  --border: #e0e0e0; /* Subtle gray borders */
+
+  --text-primary: #121212; /* Near-black text for high contrast */
+  --text-muted: #5f6368; /* Google-style muted gray for secondary text */
+
+  --accent: #6200ee; /* Material Light Purple */
+  --accent-secondary: #018786; /* Material Light Teal */
+  --warning: #b26a00; /* Darker amber, readable on light backgrounds */
+}
+
+:root[data-theme='teal'],
+:root[data-theme='light-teal'] {
+  --accent: #03dac6;
+  --accent-secondary: #bb86fc;
+}

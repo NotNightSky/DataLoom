@@ -1,18 +1,4 @@
-:root {
-  --app-bg: #000000;
-  --surface: #121212;
-  --border: #272727;
-  --text-primary: #ffffff;
-  --text-muted: #a0a0a0;
-  --accent: #bb86fc;
-  --accent-secondary: #03dac6;
-}
-
-:root[data-theme='teal'] {
-  --accent: #03dac6;
-  --accent-secondary: #bb86fc;
-}
-
+/* Theme tokens live in theme.css — keep component styles here only. */
 .header {
   display: flex;
   align-items: center;

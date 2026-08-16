@@ -134,7 +134,7 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
     <div className="editor-view">
       <div className="editor-toolbar">
         {onBack && (
-          <button type="button" className="pane-btn toolbar-back" onClick={onBack} aria-label="Back to generators">
+          <button type="button" className="pane-btn" onClick={onBack} aria-label="Back to generators">
             <ChevronLeft size={14} />
             Generators
           </button>

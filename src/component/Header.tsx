@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
-import { Coffee, Palette, Search } from 'lucide-react';
+import { Coffee, Moon, Palette, Search, Sun } from 'lucide-react';
+import { useIsLight, setIsLight } from '../lib/theme';
 import '../styles/header.css';
 
 const GitHubMark = () => (
@@ -8,13 +9,29 @@ const GitHubMark = () => (
   </svg>
 );
 
-export function Header() {
+interface HeaderProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+}
+
+export function Header({ search, onSearchChange }: HeaderProps) {
   const [isTeal, setIsTeal] = useState(false);
+  const isLight = useIsLight();
+
+  const updateTheme = (teal: boolean, light: boolean) => {
+    const theme = light ? (teal ? 'light-teal' : 'light') : teal ? 'teal' : 'purple';
+    document.documentElement.dataset.theme = theme;
+  };
 
   const toggleAccent = () => {
     const next = !isTeal;
     setIsTeal(next);
-    document.documentElement.dataset.theme = next ? 'teal' : 'purple';
+    updateTheme(next, isLight);
+  };
+
+  const toggleMode = () => {
+    setIsLight(!isLight);
+    updateTheme(isTeal, !isLight);
   };
 
   return (
@@ -26,12 +43,21 @@ export function Header() {
 
       <div className="header-search">
         <Search className="header-search-icon" size={16} />
-        <input type="text" placeholder="Search…" className="header-search-input" />
+        <input
+          type="text"
+          placeholder="Search generators…"
+          className="header-search-input"
+          value={search}
+          onInput={(event) => onSearchChange((event.target as HTMLInputElement).value)}
+        />
       </div>
 
       <div className="header-actions">
-        <button type="button" className="header-btn" aria-label="Switch accent color" onClick={toggleAccent}>
+        <button type="button" className="header-btn" aria-label={isTeal ? 'Switch to purple accent' : 'Switch to teal accent'} onClick={toggleAccent}>
           <Palette size={18} />
+        </button>
+        <button type="button" className="header-btn" aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'} onClick={toggleMode}>
+          {isLight ? <Sun size={18} /> : <Moon size={18} />}
         </button>
         <a
           href="https://github.com/NotNightSky/"

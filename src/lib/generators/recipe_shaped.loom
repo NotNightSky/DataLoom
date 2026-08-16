@@ -1,0 +1,13 @@
+---
+id: recipe_shaped
+name: Shaped Recipe
+description: Generates a shaped crafting recipe.
+defaultJson: '{ "type": "minecraft:crafting_shaped", "pattern": [] }'
+---
+// Fabric DataGen Recipe
+ShapedRecipeJsonBuilder.create(RecipeCategory.MISC,Items.{{toItemEnum data.result.id}},{{data.result.count}})
+{{#each data.pattern}}
+    .pattern("{{this}}")
+{{/each}}
+    .criterion("has_item", conditionsFromItem(Items.DIRT))
+    .offerTo(exporter, Identifier.of("dataloom", "{{stripNamespace data.result.id}}"));

@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react';
 import type { OnChange } from '@monaco-editor/react';
 import { AlertCircle, AlertTriangle } from 'lucide-react';
+import { useIsLight } from '../lib/theme';
 
 interface JsonEditorProps {
   value: string;
@@ -12,6 +13,7 @@ interface JsonEditorProps {
 }
 
 export function JsonEditor({ value, onChange, error, issues, recovered, booting }: JsonEditorProps) {
+  const isLight = useIsLight();
   const handleChange: OnChange = (next) => {
     onChange(next ?? '');
   };
@@ -42,7 +44,7 @@ export function JsonEditor({ value, onChange, error, issues, recovered, booting 
         <Editor
           height="100%"
           language="json"
-          theme="vs-dark"
+          theme={isLight ? 'vs' : 'vs-dark'}
           value={value}
           onChange={handleChange}
           options={{
