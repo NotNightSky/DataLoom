@@ -1,6 +1,5 @@
-import { useState } from 'preact/hooks';
 import { Coffee, Moon, Palette, Search, Sun } from 'lucide-react';
-import { useIsLight, setIsLight } from '../lib/theme';
+import { setAccent, setIsLight, useTheme } from '../lib/theme';
 import '../styles/header.css';
 
 const GitHubMark = () => (
@@ -15,23 +14,14 @@ interface HeaderProps {
 }
 
 export function Header({ search, onSearchChange }: HeaderProps) {
-  const [isTeal, setIsTeal] = useState(false);
-  const isLight = useIsLight();
-
-  const updateTheme = (teal: boolean, light: boolean) => {
-    const theme = light ? (teal ? 'light-teal' : 'light') : teal ? 'teal' : 'purple';
-    document.documentElement.dataset.theme = theme;
-  };
+  const { isLight, accent } = useTheme();
 
   const toggleAccent = () => {
-    const next = !isTeal;
-    setIsTeal(next);
-    updateTheme(next, isLight);
+    setAccent(accent === 'teal' ? 'purple' : 'teal');
   };
 
   const toggleMode = () => {
     setIsLight(!isLight);
-    updateTheme(isTeal, !isLight);
   };
 
   return (
@@ -53,7 +43,7 @@ export function Header({ search, onSearchChange }: HeaderProps) {
       </div>
 
       <div className="header-actions">
-        <button type="button" className="header-btn" aria-label={isTeal ? 'Switch to purple accent' : 'Switch to teal accent'} onClick={toggleAccent}>
+        <button type="button" className="header-btn" aria-label={accent === 'teal' ? 'Switch to purple accent' : 'Switch to teal accent'} onClick={toggleAccent}>
           <Palette size={18} />
         </button>
         <button type="button" className="header-btn" aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'} onClick={toggleMode}>

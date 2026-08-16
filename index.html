@@ -1,12 +1,26 @@
 <!doctype html>
-<html lang="en" data-theme="teal">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>dataloom</title>
+    <script>
+      (() => {
+        try {
+          const savedMode = localStorage.getItem('dataloom-mode');
+          const savedAccent = localStorage.getItem('dataloom-accent') || 'teal';
+          const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          const isLight = savedMode === 'light' || savedMode === 'dark' ? savedMode === 'light' : prefersLight;
+          const accent = savedAccent === 'purple' ? 'purple' : 'teal';
+          const theme = isLight ? (accent === 'teal' ? 'light-teal' : 'light') : accent === 'teal' ? 'teal' : 'purple';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch {
+          document.documentElement.setAttribute('data-theme', 'teal');
+        }
+      })();
+    </script>
     <style>
-      /* Critical CSS: matches theme.css dark palette to avoid a white flash */
       :root {
         --app-bg: #000000;
         --surface: #121212;
@@ -14,9 +28,28 @@
         --border: #272727;
         --text-primary: #ffffff;
         --text-muted: #a0a0a0;
+        --accent: #bb86fc;
+        --accent-secondary: #03dac6;
+      }
+
+      :root[data-theme='light'],
+      :root[data-theme='light-teal'] {
+        --app-bg: #f5f5f5;
+        --surface: #ffffff;
+        --surface-alt: #f0f0f0;
+        --border: #e0e0e0;
+        --text-primary: #121212;
+        --text-muted: #5f6368;
+        --accent: #6200ee;
+        --accent-secondary: #018786;
+      }
+
+      :root[data-theme='teal'],
+      :root[data-theme='light-teal'] {
         --accent: #03dac6;
         --accent-secondary: #bb86fc;
       }
+
       html,
       body {
         margin: 0;
