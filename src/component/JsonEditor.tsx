@@ -58,11 +58,6 @@ export function JsonEditor({ value, onChange, error, issues, recovered, booting 
           }}
         />
       </div>
-      <div className="pane-footer">
-        <span className="pane-footer-hint">
-          Parsed via the Spyglass AST — broken documents still generate from the recovered parts.
-        </span>
-      </div>
     </div>
   );
 }

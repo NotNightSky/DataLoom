@@ -1,13 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="teal">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>dataloom</title>
+    <style>
+      /* Critical CSS: matches theme.css dark palette to avoid a white flash */
+      :root {
+        --app-bg: #000000;
+        --surface: #121212;
+        --surface-alt: #0e0e0e;
+        --border: #272727;
+        --text-primary: #ffffff;
+        --text-muted: #a0a0a0;
+        --accent: #03dac6;
+        --accent-secondary: #bb86fc;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--app-bg);
+        color: var(--text-primary);
+      }
+      #app {
+        height: 100%;
+      }
+      .boot {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        gap: 12px;
+        color: var(--text-muted);
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+      }
+      .boot-spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid var(--surface-alt);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: boot-spin 0.8s linear infinite;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="boot">
+        <div class="boot-spinner"></div>
+        <span>Loading DataLoom...</span>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

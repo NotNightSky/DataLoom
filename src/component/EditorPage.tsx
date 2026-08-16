@@ -144,7 +144,6 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
           {backend.name} <span className="toolbar-doc-type-muted">— {backend.id}</span>
         </span>
         <div className="toolbar-spacer" />
-        <span className="toolbar-id">backend: {backend.id}</span>
       </div>
 
       <div className="editor-columns" ref={columnsRef}>

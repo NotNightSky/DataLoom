@@ -1,10 +1,11 @@
-import { Blocks, ChevronRight, CookingPot } from 'lucide-react';
+import { Blocks, ChevronRight, CookingPot, Tags } from 'lucide-react';
 import { REGISTRY } from '../lib/generators';
 import type { GeneratorBackend } from '../lib/types';
 import '../styles/generator-grid.css';
 
 const CARD_ICONS: Record<string, any> = {
   recipe_shaped: CookingPot,
+  item_tag: Tags,
 };
 
 interface GeneratorGridProps {

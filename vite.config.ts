@@ -41,4 +41,12 @@ export default defineConfig({
   worker: {
     format: 'es',
   },
+  // Pre-bundle heavy dependencies to speed up the dev server
+  optimizeDeps: {
+    include: [
+      'monaco-editor/editor/editor.api.js',
+      '@spyglassmc/core',
+      '@spyglassmc/json',
+    ],
+  },
 })

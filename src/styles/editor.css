@@ -42,13 +42,6 @@
   flex: 1;
 }
 
-.toolbar-id {
-  font-size: 11px;
-  font-family: ui-monospace, monospace;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
 .editor-columns {
   display: flex;
   flex: 1;
@@ -193,12 +186,4 @@ body.resizing {
   border-top: 1px solid var(--border);
   background: var(--surface-alt);
   flex-shrink: 0;
-}
-
-.pane-footer-hint {
-  font-size: 11px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
