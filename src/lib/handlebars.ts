@@ -32,6 +32,15 @@ function normalizeMinecraftId(val: unknown): string {
   return val.split(':').pop() || '';
 }
 
+function splitMinecraftId(val: unknown): { namespace: string; path: string } | null {
+  if (typeof val !== 'string' || val.length === 0) return null;
+  const [namespace, path] = val.split(':', 2);
+  if (!path) {
+    return { namespace: 'minecraft', path: namespace };
+  }
+  return { namespace, path };
+}
+
 function minecraftEnumName(val: unknown): string {
   const name = normalizeMinecraftId(val) || 'air';
   return name.toUpperCase();
@@ -48,7 +57,7 @@ function ingredientExpression(val: unknown): string {
       return `Items.${minecraftEnumName(record.item)}`;
     }
     if (typeof record.tag === 'string') {
-      return `ItemTags.${minecraftEnumName(record.tag)}`;
+      return tagReferenceExpression(record.tag);
     }
 
     const values = Object.values(record);
@@ -59,12 +68,25 @@ function ingredientExpression(val: unknown): string {
 
   if (typeof val === 'string') {
     if (val.startsWith('#')) {
-      return `ItemTags.${minecraftEnumName(val.slice(1))}`;
+      return tagReferenceExpression(val);
     }
     return `Items.${minecraftEnumName(val)}`;
   }
 
   return 'Items.DIRT';
+}
+
+function tagReferenceExpression(val: unknown): string {
+  if (typeof val !== 'string') return 'ItemTags.DIRT';
+  const normalized = val.startsWith('#') ? val.slice(1) : val;
+  const parsed = splitMinecraftId(normalized);
+  if (!parsed) return 'ItemTags.DIRT';
+
+  if (parsed.namespace === 'minecraft') {
+    return `ItemTags.${minecraftEnumName(parsed.path)}`;
+  }
+
+  return `TagKey.create(Registries.ITEM, Identifier.of("${parsed.namespace}:${parsed.path}"))`;
 }
 
 Handlebars.registerHelper('recipeCategory', (val: unknown) => {
@@ -91,7 +113,33 @@ Handlebars.registerHelper('recipeCategory', (val: unknown) => {
   }
 });
 
-Handlebars.registerHelper('recipeUnlock', (val: unknown) => ingredientExpression(val));
+Handlebars.registerHelper('recipeUnlock', (val: unknown) => new Handlebars.SafeString(ingredientExpression(val)));
+
+Handlebars.registerHelper('tagEntry', (val: unknown) => {
+  if (val && typeof val === 'object') {
+    const record = val as Record<string, unknown>;
+    if (typeof record.id === 'string' && record.id.startsWith('#')) {
+      const tag = tagReferenceExpression(record.id);
+      return new Handlebars.SafeString(
+        record.required === false
+          ? `.addOptionalTag(${tag})`
+          : `.addTag(${tag})`,
+      );
+    }
+    if (typeof record.id === 'string') {
+      return new Handlebars.SafeString(`.add(Identifier.of("${record.id}"))`);
+    }
+  }
+
+  if (typeof val === 'string') {
+    if (val.startsWith('#')) {
+      return new Handlebars.SafeString(`.forceAddTag(${tagReferenceExpression(val)})`);
+    }
+    return new Handlebars.SafeString(`.add(Identifier.of("${val}"))`);
+  }
+
+  return '';
+});
 
 // Fallback / Default helper: {{coalesce data.result.count 1}}
 Handlebars.registerHelper('coalesce', function (value, defaultValue) {

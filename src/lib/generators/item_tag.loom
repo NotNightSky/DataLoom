@@ -2,11 +2,14 @@
 id: item_tag
 name: Item Tag
 description: Groups items together under a single tag.
-defaultJson: '{ "replace": false, "values": ["minecraft:dirt", "minecraft:stone"] }'
+defaultJson: '{ "replace": true, "values": ["minecraft:slime_ball", "minecraft:rotten_flesh", { "id": "#minecraft:dirt", "required": false }, "minecraft:oak_planks", "#minecraft:banners" ] }'
 ---
 // Fabric DataGen Tag
-getOrCreateTagBuilder(MyTags.CUSTOM_TAG)
+builder(MyTags.CUSTOM_TAG)
 {{#each data.values}}
-    .add(Identifier.of("{{this}}"))
+    {{tagEntry this}}
 {{/each}}
+{{#if data.replace}}
+    .setReplace(true)
+{{/if}}
     ;
