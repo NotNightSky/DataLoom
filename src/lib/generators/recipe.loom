@@ -27,6 +27,9 @@ shaped(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result.
 {{#each data.key}}
     .define('{{@key}}', {{recipeUnlock this}})
 {{/each}}
+{{#if data.group}}
+    .group("{{data.group}}")
+{{/if}}
     .unlockedBy(getHasName({{recipeUnlock data.key}}), has({{recipeUnlock data.key}}))
     .save(exporter);
 {{else if (eq data.type "minecraft:crafting_shapeless")}}
@@ -40,6 +43,9 @@ shapeless(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.resu
     .requires(ItemTags.{{toItemEnum this.tag}})
     {{/if}}
 {{/each}}
+{{#if data.group}}
+    .group("{{data.group}}")
+{{/if}}
     .unlockedBy(getHasName({{recipeUnlock data.ingredients}}), has({{recipeUnlock data.ingredients}}))
     .save(exporter);
 {{else if (eq data.type "minecraft:smelting")}}
@@ -51,6 +57,9 @@ smelting(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.resul
     .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
 {{else}}
     .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+{{#if data.group}}
+    .group("{{data.group}}")
 {{/if}}
     .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
     .save(exporter);
@@ -64,6 +73,9 @@ blasting(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.resul
 {{else}}
     .requires(Items.{{toItemEnum data.ingredient}})
 {{/if}}
+{{#if data.group}}
+    .group("{{data.group}}")
+{{/if}}
     .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
     .save(exporter);
 {{else if (eq data.type "minecraft:smoking")}}
@@ -75,6 +87,9 @@ smoking(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.result
     .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
 {{else}}
     .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+{{#if data.group}}
+    .group("{{data.group}}")
 {{/if}}
     .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
     .save(exporter);
@@ -88,6 +103,9 @@ campfireCooking(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if dat
 {{else}}
     .requires(Items.{{toItemEnum data.ingredient}})
 {{/if}}
+{{#if data.group}}
+    .group("{{data.group}}")
+{{/if}}
     .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
     .save(exporter);
 {{else if (eq data.type "minecraft:stonecutting")}}
@@ -99,6 +117,9 @@ stonecutting(RecipeCategory.{{recipeCategory data.category}}, Items.{{#if data.r
     .requires(ItemTags.{{toItemEnum data.ingredient.tag}})
 {{else}}
     .requires(Items.{{toItemEnum data.ingredient}})
+{{/if}}
+{{#if data.group}}
+    .group("{{data.group}}")
 {{/if}}
     .unlockedBy(getHasName({{recipeUnlock data.ingredient}}), has({{recipeUnlock data.ingredient}}))
     .save(exporter);
