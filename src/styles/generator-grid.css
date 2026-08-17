@@ -110,6 +110,23 @@
   color: var(--text-muted);
 }
 
+.gen-card-versions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.gen-card-ver {
+  padding: 1px 7px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 10px;
+  color: var(--accent-secondary);
+  white-space: nowrap;
+}
+
 .gen-card-cta {
   display: flex;
   align-items: center;

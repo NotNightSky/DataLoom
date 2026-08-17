@@ -1,6 +1,7 @@
 ---
 id: item_tag
 name: Item Tag
+version: "26.2"
 description: Groups items together under a single tag.
 defaultJson: '{ "replace": true, "values": ["minecraft:slime_ball", "minecraft:rotten_flesh", { "id": "#minecraft:dirt", "required": false }, "minecraft:oak_planks", "#minecraft:banners" ] }'
 ---

@@ -8,6 +8,7 @@ export interface DataDoc {
 export interface GeneratorBackend {
   id: string;
   name: string;
+  version: string;
   description: string;
   defaultJson: string;
   /**
@@ -15,4 +16,16 @@ export interface GeneratorBackend {
    * into a string of Fabric DataGen Java code.
    */
   generateJava: (doc: DataDoc) => string;
+}
+
+/**
+ * All .loom templates sharing the same generator id, grouped together so the
+ * UI can offer a Minecraft-version selector. `versions` is sorted newest-first.
+ */
+export interface GeneratorGroup {
+  id: string;
+  name: string;
+  description: string;
+  versions: string[];
+  templatesByVersion: Record<string, GeneratorBackend>;
 }

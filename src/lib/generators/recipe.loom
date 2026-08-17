@@ -1,6 +1,7 @@
 ---
 id: recipe
 name: Recipe
+version: "26.2"
 description: Generates Java recipe code based on the recipe type in the JSON.
 defaultJson: '{
             "type": "minecraft:crafting_shaped",

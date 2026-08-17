@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { ChevronLeft } from 'lucide-react';
 import '../lib/monaco';
-import type { DataDoc, GeneratorBackend } from '../lib/types';
+import type { DataDoc, GeneratorBackend, GeneratorGroup } from '../lib/types';
 import { getSpyglass } from '../lib/spyglass';
 import type { SpyglassParseResult } from '../lib/spyglass';
 import { JsonEditor } from './JsonEditor';
@@ -9,7 +9,9 @@ import { JavaOutput } from './JavaOutput';
 import '../styles/editor.css';
 
 interface EditorPageProps {
+  group: GeneratorGroup;
   backend: GeneratorBackend;
+  onVersionChange?: (version: string) => void;
   onBack?: () => void;
 }
 
@@ -25,7 +27,7 @@ function parseDefaultJson(defaultJson: string): DataDoc {
   return { data: {} };
 }
 
-export function EditorPage({ backend, onBack }: EditorPageProps) {
+export function EditorPage({ group, backend, onVersionChange, onBack }: EditorPageProps) {
   const [doc, setDoc] = useState<DataDoc>(() => parseDefaultJson(backend.defaultJson));
   const [jsonText, setJsonText] = useState(() => backend.defaultJson);
   const [jsonError, setJsonError] = useState<string | null>(null);
@@ -88,11 +90,20 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
   };
 
   // Boot the Spyglass engine once and seed the document from the initial JSON.
+  // Re-runs when the backend changes (e.g. the user switches Minecraft
+  // version), reseeding the editor with that version's default JSON.
   useEffect(() => {
+    const text = backend.defaultJson;
+    setJsonText(text);
+    setDoc(parseDefaultJson(text));
+    setJsonIssues([]);
+    setJsonRecovered(false);
+    setJsonError(null);
+    setSpyglassBooted(false);
     const timer = window.setTimeout(async () => {
       try {
         const service = await getSpyglass();
-        applyParseResult(await service.parse(jsonText));
+        applyParseResult(await service.parse(text));
       } catch (err) {
         setSpyglassBooted(true);
         setJsonIssues([]);
@@ -143,6 +154,20 @@ export function EditorPage({ backend, onBack }: EditorPageProps) {
         <span className="toolbar-doc-type">
           {backend.name} <span className="toolbar-doc-type-muted">— {backend.id}</span>
         </span>
+        <label className="toolbar-version">
+          <span className="toolbar-version-label">MC</span>
+          <select
+            value={backend.version}
+            onChange={(e) => onVersionChange?.(e.currentTarget.value)}
+            aria-label="Minecraft version"
+          >
+            {group.versions.map((version) => (
+              <option key={version} value={version}>
+                v{version}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="toolbar-spacer" />
       </div>
 

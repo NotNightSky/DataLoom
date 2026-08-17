@@ -38,6 +38,7 @@ export default function loomPlugin(): Plugin {
         export default {
           id: ${JSON.stringify(metadata.id)},
           name: ${JSON.stringify(metadata.name)},
+          version: ${JSON.stringify(metadata.version || 'latest')},
           description: ${JSON.stringify(metadata.description)},
           defaultJson: ${JSON.stringify(metadata.defaultJson || '{}')},
           generateJava: (doc) => renderTemplate(doc)

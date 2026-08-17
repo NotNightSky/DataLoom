@@ -3,15 +3,18 @@ import type { ComponentType } from 'preact';
 import { Header } from './component/Header';
 import { Footer } from './component/Footer';
 import { GeneratorGrid } from './component/GeneratorGrid';
-import type { GeneratorBackend } from './lib/types';
+import type { GeneratorBackend, GeneratorGroup } from './lib/types';
 
 type EditorPageProps = {
+  group: GeneratorGroup;
   backend: GeneratorBackend;
+  onVersionChange?: (version: string) => void;
   onBack: () => void;
 };
 
 export function App() {
-  const [backend, setBackend] = useState<GeneratorBackend | null>(null);
+  const [group, setGroup] = useState<GeneratorGroup | null>(null);
+  const [version, setVersion] = useState('');
   const [query, setQuery] = useState('');
   const [EditorPageComponent, setEditorPageComponent] = useState<ComponentType<EditorPageProps> | null>(null);
 
@@ -28,8 +31,11 @@ export function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSelectBackend = (selected: GeneratorBackend) => {
-    setBackend(selected);
+  const backend = group ? group.templatesByVersion[version] : null;
+
+  const handleSelectGroup = (selected: GeneratorGroup) => {
+    setGroup(selected);
+    setVersion(selected.versions[0]);
     if (!EditorPageComponent) {
       import('./component/EditorPage')
         .then((module) => {
@@ -43,9 +49,14 @@ export function App() {
     <div className="h-screen flex flex-col overflow-hidden bg-(--app-bg) text-(--text-primary)">
       <Header search={query} onSearchChange={setQuery} />
       <main className="grow flex flex-col min-h-0">
-        {backend ? (
+        {group && backend ? (
           EditorPageComponent ? (
-            <EditorPageComponent backend={backend} onBack={() => setBackend(null)} />
+            <EditorPageComponent
+              group={group}
+              backend={backend}
+              onVersionChange={setVersion}
+              onBack={() => setGroup(null)}
+            />
           ) : (
             <div className="boot">
               <div className="boot-spinner"></div>
@@ -53,7 +64,7 @@ export function App() {
             </div>
           )
         ) : (
-          <GeneratorGrid query={query} onSelect={handleSelectBackend} />
+          <GeneratorGrid query={query} onSelect={handleSelectGroup} />
         )}
       </main>
       <Footer />

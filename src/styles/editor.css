@@ -38,6 +38,35 @@
   color: var(--text-muted);
 }
 
+.toolbar-version {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.toolbar-version-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.toolbar-version select {
+  padding: 3px 8px;
+  background: var(--app-bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--accent);
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 120ms;
+}
+
+.toolbar-version select:hover {
+  border-color: var(--accent);
+}
+
 .toolbar-spacer {
   flex: 1;
 }
