@@ -23,20 +23,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Install pnpm first
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9 # Specify your pnpm version
+          version: 9
 
-      # 2. Setup Node.js and cache pnpm store
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # Use stable LTS (Node 22 or 24)
+          node-version: 24
           cache: 'pnpm'
 
-      # 3. Install dependencies using pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
