@@ -5,6 +5,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import loomPlugin from './vite-plugin-loom.ts'
 
 export default defineConfig({
+  base: '/DataLoom/',
   plugins: [
     preact(),
     tailwindcss(),
