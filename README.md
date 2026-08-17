@@ -2,8 +2,7 @@
 
 A browser tool that converts Minecraft data-pack JSON recipes, tags, and loot tables into Fabric DataGen Java code.
 
-> Status: early. the core conversion UI and logic are still to be built.
-
+> Status: partially complete, addition of multiple new generators.
 ## Tech stack
 
 - [Preact](https://preactjs.com/) + TypeScript
